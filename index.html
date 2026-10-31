@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Task List</title>
+
+    <!-- Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Tailwind custom config -->
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: {
+                50:  "#eff6ff",
+                100: "#dbeafe",
+                500: "#3b82f6",
+                600: "#2563eb",
+                700: "#1d4ed8",
+              },
+              accent: {
+                400: "#fb923c",
+                500: "#f97316",
+                600: "#ea580c",
+              },
+            },
+            fontFamily: {
+              sans: ["Inter", "ui-sans-serif", "system-ui", "sans-serif"],
+            },
+          },
+        },
+      };
+    </script>
+
+    <!-- Google Fonts: Inter -->
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+    />
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css" />
+  </head>
+
+  <body class="min-h-screen bg-gradient-to-br from-primary-50 via-white to-blue-50 font-sans text-gray-800 antialiased">
+
+    <!-- ===== HEADER ===== -->
+    <header class="bg-white/80 backdrop-blur-sm shadow-sm sticky top-0 z-10">
+      <div class="max-w-2xl mx-auto px-4 py-4 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <!-- Ikon checklist sederhana (SVG inline) -->
+          <svg class="w-7 h-7 text-primary-600" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"
+            />
+          </svg>
+          <h1 class="text-xl font-bold text-primary-700 tracking-tight">Task List</h1>
+        </div>
+      </div>
+    </header>
+
+    <!-- ===== MAIN CONTENT ===== -->
+    <main class="max-w-2xl mx-auto px-4 py-8">
+
+      <!-- Card utama -->
+      <div class="bg-white rounded-2xl shadow-md overflow-hidden">
+
+        <!-- Form tambah task -->
+        <div class="p-5 border-b border-gray-100">
+          <form id="task-form" class="flex gap-3" novalidate>
+            <input
+              id="task-input"
+              type="text"
+              placeholder="Tambahkan task baru..."
+              maxlength="120"
+              autocomplete="off"
+              class="flex-1 rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm
+                     focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent
+                     placeholder-gray-400 transition"
+            />
+            <button
+              type="submit"
+              class="bg-primary-600 hover:bg-primary-700 active:bg-primary-700 text-white
+                     font-semibold text-sm px-5 py-2.5 rounded-xl transition-all
+                     focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2
+                     flex items-center gap-1.5 shrink-0"
+            >
+              <!-- Ikon + -->
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+              </svg>
+              Tambah
+            </button>
+          </form>
+          <!-- Pesan validasi -->
+          <p id="validation-msg" class="text-red-500 text-xs mt-2 hidden">Task tidak boleh kosong.</p>
+        </div>
+
+        <!-- Filter tab: All / Active / Completed -->
+        <div class="flex border-b border-gray-100 bg-gray-50/50" role="tablist" aria-label="Filter task">
+          <button data-filter="all"       class="filter-btn active-filter flex-1 py-3 text-sm font-medium transition-colors" role="tab" aria-selected="true">Semua <span id="count-all"       class="tab-count"></span></button>
+          <button data-filter="active"    class="filter-btn flex-1 py-3 text-sm font-medium transition-colors" role="tab" aria-selected="false">Aktif <span id="count-active"    class="tab-count"></span></button>
+          <button data-filter="completed" class="filter-btn flex-1 py-3 text-sm font-medium transition-colors" role="tab" aria-selected="false">Selesai <span id="count-completed" class="tab-count"></span></button>
+        </div>
+
+        <!-- Daftar task -->
+        <ul id="task-list" class="divide-y divide-gray-100" role="list" aria-label="Daftar task">
+          <!-- Task item dirender oleh JavaScript -->
+        </ul>
+
+        <!-- State kosong -->
+        <div id="empty-state" class="hidden py-14 flex flex-col items-center gap-3 text-gray-400">
+          <svg class="w-12 h-12 opacity-30" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+          </svg>
+          <p id="empty-msg" class="text-sm font-medium">Belum ada task. Tambahkan sekarang!</p>
+        </div>
+
+        <!-- Footer card: info + hapus semua selesai -->
+        <div id="card-footer" class="hidden px-5 py-3 flex items-center justify-between bg-gray-50/70 border-t border-gray-100">
+          <span id="footer-count" class="text-xs text-gray-500"></span>
+          <button id="clear-completed-btn"
+            class="text-xs text-accent-500 hover:text-accent-600 font-medium transition-colors
+                   focus:outline-none focus:underline">
+            Hapus semua selesai
+          </button>
+        </div>
+
+      </div>
+    </main>
+
+    <!-- ===== MODAL EDIT TASK ===== -->
+    <div id="edit-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <!-- Overlay -->
+      <div id="modal-overlay" class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+      <!-- Panel -->
+      <div class="relative bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
+        <h2 id="modal-title" class="text-base font-semibold text-gray-800 mb-4">Edit Task</h2>
+        <input
+          id="edit-input"
+          type="text"
+          maxlength="120"
+          class="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm
+                 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent
+                 transition mb-4"
+        />
+        <p id="edit-validation-msg" class="text-red-500 text-xs -mt-2 mb-3 hidden">Task tidak boleh kosong.</p>
+        <div class="flex gap-3 justify-end">
+          <button id="cancel-edit-btn"
+            class="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-800
+                   bg-gray-100 hover:bg-gray-200 rounded-xl transition focus:outline-none">
+            Batal
+          </button>
+          <button id="save-edit-btn"
+            class="px-5 py-2 text-sm font-semibold text-white bg-primary-600 hover:bg-primary-700
+                   rounded-xl transition focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2">
+            Simpan
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Script utama -->
+    <script src="script.js"></script>
+  </body>
+</html>
